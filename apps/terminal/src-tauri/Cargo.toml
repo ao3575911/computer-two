@@ -1,0 +1,27 @@
+[package]
+name = "computer-two"
+version = "0.1.0"
+description = "C:2 Terminal"
+edition = "2024"
+rust-version = "1.99.1"
+
+[lib]
+name = "computer_two_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = "=2.7.2"
+
+[dependencies]
+tauri = "=2.12.3"
+
+[target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
+atk = "=0.18.2"
+gtk = { version = "=0.18.2", features = ["v3_24"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
