@@ -39,6 +39,8 @@ npm run tauri build -- --debug --no-bundle
 
 The window title is `C:2 Terminal`. The accessible name is `Computer Two`. The visible wordmark is `Computer II`. Build `0.1.0` is shown on the first screen.
 
+Tauri rejects `:` in `productName` (`^[^/\\:*?\"<>|]+$`). The bundle name is therefore `Computer Two`, which is the spoken name. The window title stays `C:2 Terminal`.
+
 `Open folder`, `Start sample mission`, and `Open shell` are disabled buttons. They do not open a folder, start a mission, or open a shell.
 
 ## Limitations
@@ -47,7 +49,21 @@ The window title is `C:2 Terminal`. The accessible name is `Computer Two`. The v
 - The three first-screen actions are inert.
 - No protocol types, broker, sandbox, model adapter, cloud control plane, or OS image.
 - The blueprint simulator is not included.
-- Content-Security-Policy allows only same-origin scripts and styles. `npm run tauri dev` may show a blank page because the Vite React preamble is an inline script. The verified launch path is the bundled binary above.
+- Content-Security-Policy allows only same-origin scripts and styles. The verified launch path is the bundled debug binary above. `npm run tauri dev` was not the command used for this check. Vite's React preamble is an inline script, so that command may not render under this policy.
 - App icons are the unmodified create-tauri-app placeholders. They are not Computer II brand assets.
 - Repository license, domains, and trademark jurisdictions are undecided.
-- Launch result: recorded in the pull request after the build on this machine.
+- A release build (`npm run tauri build` without `--debug`) was not run. The verified build is the debug binary.
+
+## Launch result
+
+On this machine, `DISPLAY=:1` was a live X11 session. The command above completed, and `./src-tauri/target/debug/computer-two` opened a window.
+
+Observed:
+
+- `WM_NAME` and `_NET_WM_NAME` were `C:2 Terminal`.
+- The AT-SPI frame name was `Computer Two`. The application object name was `computer-two`, the binary name.
+- The first screen showed Computer II, C:2 Terminal, the three disabled actions, and `Build 0.1.0`.
+- Clicking those actions opened no other window.
+- WebKit's accessibility tree in this session exposed the frame and did not expose the page buttons as separate AT-SPI objects. The buttons are disabled in the page.
+
+Screenshot: `media/slice-1-step-1.png` in the build notes for this session. It is not committed in this repository.
