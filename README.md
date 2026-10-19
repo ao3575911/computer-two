@@ -1,6 +1,6 @@
 # computer-two
 
-C:2 Terminal is the Computer II desktop application. Slice 1 currently has the Linux desktop shell, a real local PTY, versioned protocol types, a mock planner, a slice 1 sandbox for one read and test tool, a mission timeline, and a diff that is not applied.
+C:2 Terminal is the Computer II desktop application. Slice 1 currently has the Linux desktop shell, a real local PTY, versioned protocol types, a mock planner, a slice 1 sandbox for one read and test tool, a mission timeline, and a reviewed diff that can be applied only when the base is unchanged.
 
 The repository license is undecided. Upstream components keep their own licenses. No project license file is included.
 
@@ -49,7 +49,7 @@ Tauri rejects `:` in `productName` (`^[^/\\:*?\"<>|]+$`). The bundle name is the
 - Open folder and Start sample mission do not run.
 - There is no broker, model adapter, cloud control plane, or OS image. `packages/protocol` has the starter schemas, the dispatch envelope, a mock mission reducer, a mock planner, and an append-only mission event log. The planner emits one fixed dispatch envelope. It is not connected to the terminal window or to the sandbox. It does not call a model, and it does not execute a tool. The event log uses the step 3 event shape. It does not add authority-bearing fields, and it has no hash chain.
 - `Run failing-add check` runs the slice 1 sandbox tool and shows the mission timeline in the window. The summary and the raw unittest log are separate. The check failure is an observation. The fixture is not fixed. The log is in memory for that run. It is not a durable store.
-- `Show failing-add diff` records a base revision of `fixtures/failing-add`, prepares one edit so `add` returns the sum, and runs `python3 -m unittest` on that copy inside the slice 1 sandbox. The window shows the diff. The patch is not applied to the fixture files. No model is connected.
+- `Show failing-add diff` records a base revision of `fixtures/failing-add`, prepares one edit so `add` returns the sum, and runs `python3 -m unittest` on that copy inside the slice 1 sandbox. The window shows the diff. `Apply` writes that edit only when the base and result hashes still match the review. A newer local file is left intact and the window shows a conflict. `Stop` blocks a new apply immediately. A write whose confirmation is lost stays reconciling and is not shown as cancelled. No model is connected.
 - `packages/sandbox` is a slice 1 sandbox, not a production-grade boundary. Bubblewrap supplies a private mount namespace and turns the network off. The read/test tool can read manifest files and run `python3 -m unittest` inside that namespace. A prompt rule is not the control. Host `/usr`, `/lib`, and `/lib64` are mounted so Python can run. The host Docker socket is not mounted. Symlinks are rejected before the bind; that check is not a production TOCTOU defense. An independent escape assessment has not been done. This does not claim protection against a compromised host kernel, firmware, hardware, or a physical attacker.
 - The blueprint simulator is not included.
 - Content-Security-Policy allows same-origin scripts. Styles allow same-origin files and inline style rules, because xterm.js sets cell color, font, and size that way. The text is the page color on the terminal background when those rules are blocked. The verified launch path is the bundled debug binary above. `npm run tauri dev` was not the command used for this check. Vite's React preamble is an inline script, so that command may not render under this policy.
@@ -87,7 +87,7 @@ npm test
 
 ## Slice 1 sandbox
 
-`fixtures/failing-add` is synthetic. Its `add` function returns the wrong sum. `python3 -m unittest` is the independent check. The repository file stays wrong. A proposed edit is checked on a copy and is not written back.
+`fixtures/failing-add` is synthetic. Its `add` function returns the wrong sum. `python3 -m unittest` is the independent check. The repository file stays wrong until Apply writes a review whose base is unchanged. A proposed edit is checked on a copy first.
 
 The tool mounts only the manifest files, read-only, at `/workspace`. The runtime is bubblewrap: a private mount namespace and no network. This is a slice 1 sandbox, not a production-grade boundary.
 
@@ -103,4 +103,8 @@ npm test
 
 ## Diff
 
-`Show failing-add diff` captures the base revision, shows one bounded edit to `fixtures/failing-add/add.py`, and runs `python3 -m unittest` inside the slice 1 sandbox. The patch is not applied.
+`Show failing-add diff` captures the base revision, shows one bounded edit to `fixtures/failing-add/add.py`, and runs `python3 -m unittest` inside the slice 1 sandbox. The patch is not applied until Apply.
+
+## Apply
+
+`Apply` checks the base revision and the result hash shown on the diff. When both still match, it writes `fixtures/failing-add/add.py`. When the base changed, it leaves the newer file intact, shows a conflict, and offers a new review when the bounded edit still fits. `Stop` blocks the next local dispatch immediately. If a write has started and the confirmation is lost, the status stays reconciling. The hash check is not a production TOCTOU defense.

@@ -6,6 +6,7 @@ fn main() {
             "resize_pty",
             "run_failing_add_check",
             "show_failing_add_diff",
+            "apply_reviewed_patch",
         ]),
     ))
     .expect("failed to run tauri-build");

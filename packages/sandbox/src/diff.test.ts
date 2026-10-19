@@ -22,6 +22,12 @@ test("a bounded edit is checked in the sandbox and is not applied", async () => 
   }
 
   assert.equal(result.applied, false);
+  assert.equal(result.resultSha256.length, 64);
+  const reviewed = boundedSumEdit(before.toString("utf8"));
+  assert.equal(reviewed === undefined, false);
+  if (reviewed !== undefined) {
+    assert.equal(result.resultSha256, createHash("sha256").update(reviewed).digest("hex"));
+  }
   assert.equal(result.base.fixture, "fixtures/failing-add");
   assert.deepEqual(
     result.base.files.map((file) => file.path),

@@ -25,6 +25,7 @@ export type FailingAddDiff =
   | {
       ok: true;
       base: BaseRevision;
+      resultSha256: string;
       diff: string;
       applied: false;
       exitCode: number;
@@ -120,6 +121,7 @@ export async function proposeFailingAddDiff(
     return {
       ok: true,
       base,
+      resultSha256: sha256(edited),
       diff: unifiedDiff(`${FIXTURE}/add.py`, before, edited),
       applied: false,
       exitCode: ran.exitCode,

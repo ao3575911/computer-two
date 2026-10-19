@@ -10,6 +10,7 @@
     "allow-write-pty",
     "allow-resize-pty",
     "allow-run-failing-add-check",
-    "allow-show-failing-add-diff"
+    "allow-show-failing-add-diff",
+    "allow-apply-reviewed-patch"
   ]
 }

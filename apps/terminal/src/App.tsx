@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
+import { parseApplyResult, type ShownApply } from "./apply-result";
 import { errorText, parseCheckResult, type ShownCheck } from "./check-result";
 import { parseDiffResult, type ShownDiff } from "./diff-result";
-import DiffScreen from "./DiffScreen";
+import DiffScreen, { type ApplyPhase } from "./DiffScreen";
 import ShellView from "./ShellView";
 import { sessionModeLabel, type SessionMode } from "./session-mode";
 import TimelineScreen from "./TimelineScreen";
@@ -26,6 +27,11 @@ export default function App() {
   const [diffStatus, setDiffStatus] = useState<CheckStatus>("running");
   const [diffView, setDiffView] = useState<ShownDiff | undefined>(undefined);
   const [diffMessage, setDiffMessage] = useState("");
+  const [applyPhase, setApplyPhase] = useState<ApplyPhase>("idle");
+  const [newerSha256, setNewerSha256] = useState("");
+  const [conflictReviewReady, setConflictReviewReady] = useState(false);
+  const [dispatchStopped, setDispatchStopped] = useState(false);
+  const dispatchStoppedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,6 +82,11 @@ export default function App() {
   }
 
   function showFailingAddDiff() {
+    dispatchStoppedRef.current = false;
+    setDispatchStopped(false);
+    setApplyPhase("idle");
+    setNewerSha256("");
+    setConflictReviewReady(false);
     setScreen("diff");
     setDiffStatus("running");
     setDiffView(undefined);
@@ -90,11 +101,118 @@ export default function App() {
         }
         setDiffView(parsed);
         setDiffStatus("ready");
+        if (dispatchStoppedRef.current) {
+          setApplyPhase("cancelled");
+          setAnnouncement("Stopped");
+        }
       })
       .catch((error: unknown) => {
         setDiffStatus("error");
         setDiffMessage(errorText(error));
+        if (dispatchStoppedRef.current) {
+          setApplyPhase("reconciling");
+          setAnnouncement("Reconciling");
+        }
       });
+  }
+
+  function stopDispatch() {
+    dispatchStoppedRef.current = true;
+    setDispatchStopped(true);
+    const waiting = applyPhase === "applying" || diffStatus === "running";
+    setAnnouncement(waiting ? "Stopping" : "Stopped");
+    if (applyPhase === "applied" || applyPhase === "reconciling" || applyPhase === "conflict") {
+      return;
+    }
+    setApplyPhase(waiting ? "stopping" : "cancelled");
+  }
+
+  function applyReviewedPatch() {
+    if (diffView === undefined || dispatchStoppedRef.current) {
+      setApplyPhase("cancelled");
+      setAnnouncement("Cancelled");
+      return;
+    }
+    const review = diffView;
+    setApplyPhase("applying");
+    setAnnouncement("Applying");
+    void invoke<string>("apply_reviewed_patch", {
+      baseDigest: review.digest,
+      resultSha256: review.resultSha256,
+    })
+      .then((body) => {
+        const parsed = parseApplyResult(body);
+        if (parsed === undefined) {
+          settleUnknownApply();
+          return;
+        }
+        settleApply(parsed);
+      })
+      .catch((error: unknown) => {
+        if (dispatchStoppedRef.current) {
+          setApplyPhase("reconciling");
+          setAnnouncement("Reconciling");
+          return;
+        }
+        const message = errorText(error);
+        setApplyPhase("error");
+        setDiffMessage(message);
+        setAnnouncement(message);
+      });
+  }
+
+  function settleUnknownApply() {
+    if (dispatchStoppedRef.current) {
+      setApplyPhase("reconciling");
+      setAnnouncement("Reconciling");
+      return;
+    }
+    setApplyPhase("error");
+    setDiffMessage("The apply did not finish.");
+    setAnnouncement("The apply did not finish.");
+  }
+
+  function settleApply(parsed: ShownApply) {
+    switch (parsed.status) {
+      case "applied":
+        setApplyPhase("applied");
+        setConflictReviewReady(false);
+        setAnnouncement("Applied");
+        return;
+      case "conflict":
+        setApplyPhase("conflict");
+        setNewerSha256(parsed.newerSha256);
+        setAnnouncement("Conflict. The newer file was left intact.");
+        if (parsed.review !== undefined && !dispatchStoppedRef.current) {
+          setConflictReviewReady(true);
+          setDiffView({
+            digest: parsed.review.digest,
+            resultSha256: parsed.review.resultSha256,
+            diff: parsed.review.diff,
+            exitCode: parsed.review.exitCode,
+            rawLog: parsed.review.rawLog,
+            applied: false,
+          });
+          return;
+        }
+        setConflictReviewReady(false);
+        return;
+      case "cancelled":
+        setApplyPhase("cancelled");
+        setConflictReviewReady(false);
+        setAnnouncement("Cancelled");
+        return;
+      case "reconciling":
+        setApplyPhase("reconciling");
+        setConflictReviewReady(false);
+        setAnnouncement("Reconciling");
+        return;
+      default: {
+        const unexpected: never = parsed;
+        setApplyPhase("error");
+        setDiffMessage(`Unexpected apply status ${String(unexpected)}`);
+      }
+    }
   }
 
   return (
@@ -161,6 +279,18 @@ export default function App() {
           status={diffStatus}
           diff={diffView}
           message={diffMessage}
+          applyPhase={applyPhase}
+          newerSha256={newerSha256}
+          reviewReady={conflictReviewReady}
+          applyEnabled={
+            diffStatus === "ready" &&
+            diffView !== undefined &&
+            !dispatchStopped &&
+            (applyPhase === "idle" ||
+              (applyPhase === "conflict" && conflictReviewReady))
+          }
+          onApply={applyReviewedPatch}
+          onStop={stopDispatch}
           onBack={() => {
             setScreen("home");
           }}

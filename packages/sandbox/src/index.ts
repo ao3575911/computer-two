@@ -12,6 +12,8 @@ export type {
   SandboxFailure,
   SandboxRun,
 } from "./bwrap.ts";
+export { applyReviewedPatch, beginLocalDispatch, createDispatchGate } from "./apply.ts";
+export type { ApplyHooks, ApplyResult, ConflictReview, DispatchGate } from "./apply.ts";
 export { boundedSumEdit, captureBaseRevision, proposeFailingAddDiff, unifiedDiff } from "./diff.ts";
 export type { BaseFileRevision, BaseRevision, FailingAddDiff } from "./diff.ts";
 export { observeFailingAddCheck } from "./observe.ts";
