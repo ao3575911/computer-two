@@ -1,6 +1,6 @@
 # computer-two
 
-C:2 Terminal is the Computer II desktop application. Slice 1 currently has the Linux desktop shell, a real local PTY, versioned protocol types, and a mock planner.
+C:2 Terminal is the Computer II desktop application. Slice 1 currently has the Linux desktop shell, a real local PTY, versioned protocol types, a mock planner, and a slice 1 sandbox for one read and test tool.
 
 The repository license is undecided. Upstream components keep their own licenses. No project license file is included.
 
@@ -47,7 +47,8 @@ Tauri rejects `:` in `productName` (`^[^/\\:*?\"<>|]+$`). The bundle name is the
 ## Limitations
 
 - Open folder and Start sample mission do not run.
-- There is no broker, sandbox, model adapter, cloud control plane, or OS image. `packages/protocol` has the starter schemas, the dispatch envelope, a mock mission reducer, and a mock planner. The planner emits one fixed dispatch envelope. It is not connected to the terminal window. It does not call a model, and it does not execute a tool.
+- There is no broker, model adapter, cloud control plane, or OS image. `packages/protocol` has the starter schemas, the dispatch envelope, a mock mission reducer, and a mock planner. The planner emits one fixed dispatch envelope. It is not connected to the terminal window or to the sandbox. It does not call a model, and it does not execute a tool.
+- `packages/sandbox` is a slice 1 sandbox, not a production-grade boundary. Bubblewrap supplies a private mount namespace and turns the network off. The read/test tool can read manifest files and run `python3 -m unittest` inside that namespace. A prompt rule is not the control. Host `/usr`, `/lib`, and `/lib64` are mounted so Python can run. The host Docker socket is not mounted. Symlinks are rejected before the bind; that check is not a production TOCTOU defense. An independent escape assessment has not been done. This does not claim protection against a compromised host kernel, firmware, hardware, or a physical attacker.
 - The blueprint simulator is not included.
 - Content-Security-Policy allows same-origin scripts. Styles allow same-origin files and inline style rules, because xterm.js sets cell color, font, and size that way. The text is the page color on the terminal background when those rules are blocked. The verified launch path is the bundled debug binary above. `npm run tauri dev` was not the command used for this check. Vite's React preamble is an inline script, so that command may not render under this policy.
 - App icons are the unmodified create-tauri-app placeholders. They are not Computer II brand assets.
@@ -78,6 +79,18 @@ The window title was `C:2 Terminal`. The AT-SPI frame name was `Computer Two`. T
 
 ```sh
 cd packages/protocol
+npm ci
+npm test
+```
+
+## Slice 1 sandbox
+
+`fixtures/failing-add` is synthetic. Its `add` function returns the wrong sum. `python3 -m unittest` is the independent check and is expected to fail. This step does not fix the function.
+
+The tool mounts only the manifest files, read-only, at `/workspace`. The runtime is bubblewrap: a private mount namespace and no network. This is a slice 1 sandbox, not a production-grade boundary.
+
+```sh
+cd packages/sandbox
 npm ci
 npm test
 ```

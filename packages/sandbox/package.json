@@ -1,0 +1,15 @@
+{
+  "name": "computer-two-sandbox",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Slice 1 bubblewrap sandbox for one confined read and test tool. Not a production-grade boundary.",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "6.0.3"
+  }
+}
