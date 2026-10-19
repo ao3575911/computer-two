@@ -24,7 +24,6 @@ export async function readManifestFile(
     "python3",
     "-c",
     READ_SCRIPT,
-    "--",
     relativePath,
   ]);
   if (!ran.ok) {

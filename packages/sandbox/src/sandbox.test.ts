@@ -110,7 +110,6 @@ test("a path outside the manifest is denied", async () => {
       "python3",
       "-c",
       PATH_PROBE,
-      "--",
       outside,
     ]);
     assert.equal(ran.ok, true);
@@ -180,7 +179,6 @@ test("a network attempt is denied by the sandbox", async () => {
       "python3",
       "-c",
       NETWORK_PROBE,
-      "--",
       String(address.port),
     ]);
     assert.equal(ran.ok, true);
@@ -218,7 +216,7 @@ test("the unittest command runs inside the workspace", async () => {
   assert.equal(ran.argv.includes("--chdir"), true);
   assert.equal(ran.argv.includes(GUEST_WORKSPACE), true);
   assert.notEqual(ran.exitCode, 0);
-  assert.match(ran.stderr, /File "\/workspace\/test_add\.py", line 6/);
+  assert.match(ran.stderr, /File "\/workspace\/test_add\.py", line 8/);
   assert.match(ran.stderr, /AssertionError: 6 != 5/);
   assert.match(ran.stderr, /FAILED \(failures=1\)/);
   const source = await readManifestFile(failingAdd, "add.py");
