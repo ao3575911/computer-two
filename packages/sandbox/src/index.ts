@@ -12,5 +12,7 @@ export type {
   SandboxFailure,
   SandboxRun,
 } from "./bwrap.ts";
+export { observeFailingAddCheck } from "./observe.ts";
+export type { CheckTimelineEntry, FailingAddObservation } from "./observe.ts";
 export { UNITTEST_COMMAND, readManifestFile, runFixtureUnittest } from "./tool.ts";
 export type { ReadResult } from "./tool.ts";

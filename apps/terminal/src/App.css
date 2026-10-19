@@ -133,6 +133,51 @@ button:disabled {
   opacity: 0.55;
 }
 
+.timeline-screen {
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 24px 32px;
+}
+
+.timeline-screen h2 {
+  margin: 12px 0 0;
+  font-size: 18px;
+}
+
+.timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline li {
+  margin-top: 8px;
+}
+
+.timeline p,
+.timeline-type {
+  margin: 0;
+}
+
+.timeline-type {
+  font-family: "Ubuntu Mono", "DejaVu Sans Mono", monospace;
+  font-size: 14px;
+}
+
+.raw-log {
+  box-sizing: border-box;
+  max-height: 220px;
+  margin: 0;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid #8d8d86;
+  background: #ffffff;
+  color: #1c1c1c;
+  font-family: "Ubuntu Mono", "DejaVu Sans Mono", monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
 .visually-hidden {
   border: 0;
   clip: rect(0 0 0 0);

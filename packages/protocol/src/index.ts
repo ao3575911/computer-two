@@ -18,6 +18,8 @@ export {
   parseMission,
 } from "./mission.ts";
 export type { MissionLocation, MissionProposal } from "./mission.ts";
+export { createEventLog, timelineLines } from "./event-log.ts";
+export type { AppendFailure, AppendResult, EventLog } from "./event-log.ts";
 export { mockPlan } from "./mock-plan.ts";
 export type { MockPlan } from "./mock-plan.ts";
 export { reduceMission } from "./reduce-mission.ts";

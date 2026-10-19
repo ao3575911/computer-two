@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Versioned Computer II protocol types, a mock mission reducer, and a mock planner. The planner emits one fixed dispatch envelope and does not call a model or run a tool.",
+  "description": "Versioned Computer II protocol types, a mock mission reducer, a mock planner, and an append-only mission event log. The planner emits one fixed dispatch envelope and does not call a model or run a tool.",
   "scripts": {
     "check": "tsc --noEmit",
     "test": "node --experimental-strip-types --test src/*.test.ts"

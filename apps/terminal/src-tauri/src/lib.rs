@@ -1,3 +1,4 @@
+mod check;
 mod pty;
 
 #[cfg(target_os = "linux")]
@@ -7,6 +8,7 @@ use gtk::prelude::WidgetExt;
 #[cfg(target_os = "linux")]
 use tauri::Manager;
 
+use check::run_failing_add_check;
 use pty::{PtyState, open_shell, resize_pty, write_pty};
 
 const ACCESSIBLE_NAME: &str = "Computer Two";
@@ -20,7 +22,12 @@ pub fn run() {
             set_linux_accessible_name(app)?;
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![open_shell, write_pty, resize_pty])
+        .invoke_handler(tauri::generate_handler![
+            open_shell,
+            write_pty,
+            resize_pty,
+            run_failing_add_check
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

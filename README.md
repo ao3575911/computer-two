@@ -1,6 +1,6 @@
 # computer-two
 
-C:2 Terminal is the Computer II desktop application. Slice 1 currently has the Linux desktop shell, a real local PTY, versioned protocol types, a mock planner, and a slice 1 sandbox for one read and test tool.
+C:2 Terminal is the Computer II desktop application. Slice 1 currently has the Linux desktop shell, a real local PTY, versioned protocol types, a mock planner, a slice 1 sandbox for one read and test tool, and a mission timeline.
 
 The repository license is undecided. Upstream components keep their own licenses. No project license file is included.
 
@@ -47,7 +47,8 @@ Tauri rejects `:` in `productName` (`^[^/\\:*?\"<>|]+$`). The bundle name is the
 ## Limitations
 
 - Open folder and Start sample mission do not run.
-- There is no broker, model adapter, cloud control plane, or OS image. `packages/protocol` has the starter schemas, the dispatch envelope, a mock mission reducer, and a mock planner. The planner emits one fixed dispatch envelope. It is not connected to the terminal window or to the sandbox. It does not call a model, and it does not execute a tool.
+- There is no broker, model adapter, cloud control plane, or OS image. `packages/protocol` has the starter schemas, the dispatch envelope, a mock mission reducer, a mock planner, and an append-only mission event log. The planner emits one fixed dispatch envelope. It is not connected to the terminal window or to the sandbox. It does not call a model, and it does not execute a tool. The event log uses the step 3 event shape. It does not add authority-bearing fields, and it has no hash chain.
+- `Run failing-add check` runs the slice 1 sandbox tool and shows the mission timeline in the window. The summary and the raw unittest log are separate. The check failure is an observation. The fixture is not fixed, and no diff is applied. The log is in memory for that run. It is not a durable store.
 - `packages/sandbox` is a slice 1 sandbox, not a production-grade boundary. Bubblewrap supplies a private mount namespace and turns the network off. The read/test tool can read manifest files and run `python3 -m unittest` inside that namespace. A prompt rule is not the control. Host `/usr`, `/lib`, and `/lib64` are mounted so Python can run. The host Docker socket is not mounted. Symlinks are rejected before the bind; that check is not a production TOCTOU defense. An independent escape assessment has not been done. This does not claim protection against a compromised host kernel, firmware, hardware, or a physical attacker.
 - The blueprint simulator is not included.
 - Content-Security-Policy allows same-origin scripts. Styles allow same-origin files and inline style rules, because xterm.js sets cell color, font, and size that way. The text is the page color on the terminal background when those rules are blocked. The verified launch path is the bundled debug binary above. `npm run tauri dev` was not the command used for this check. Vite's React preamble is an inline script, so that command may not render under this policy.
@@ -94,3 +95,7 @@ cd packages/sandbox
 npm ci
 npm test
 ```
+
+## Timeline
+
+`Run failing-add check` in the debug binary asks the slice 1 sandbox to run `python3 -m unittest` for `fixtures/failing-add`. The window timeline shows that the check ran, the check failed, and the failure is an observation. The raw log is a separate region. Open folder and Start sample mission stay disabled. Intent still reports that no planner is connected.
