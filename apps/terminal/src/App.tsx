@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
 import { errorText, parseCheckResult, type ShownCheck } from "./check-result";
+import { parseDiffResult, type ShownDiff } from "./diff-result";
+import DiffScreen from "./DiffScreen";
 import ShellView from "./ShellView";
 import { sessionModeLabel, type SessionMode } from "./session-mode";
 import TimelineScreen from "./TimelineScreen";
 
-type Screen = "home" | "session" | "timeline";
+type Screen = "home" | "session" | "timeline" | "diff";
 type CheckStatus = "running" | "ready" | "error";
 
 export default function App() {
@@ -21,6 +23,9 @@ export default function App() {
   const [checkStatus, setCheckStatus] = useState<CheckStatus>("running");
   const [check, setCheck] = useState<ShownCheck | undefined>(undefined);
   const [checkMessage, setCheckMessage] = useState("");
+  const [diffStatus, setDiffStatus] = useState<CheckStatus>("running");
+  const [diffView, setDiffView] = useState<ShownDiff | undefined>(undefined);
+  const [diffMessage, setDiffMessage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -70,6 +75,28 @@ export default function App() {
       });
   }
 
+  function showFailingAddDiff() {
+    setScreen("diff");
+    setDiffStatus("running");
+    setDiffView(undefined);
+    setDiffMessage("");
+    void invoke<string>("show_failing_add_diff")
+      .then((body) => {
+        const parsed = parseDiffResult(body);
+        if (parsed === undefined) {
+          setDiffStatus("error");
+          setDiffMessage("The diff did not return a base revision.");
+          return;
+        }
+        setDiffView(parsed);
+        setDiffStatus("ready");
+      })
+      .catch((error: unknown) => {
+        setDiffStatus("error");
+        setDiffMessage(errorText(error));
+      });
+  }
+
   return (
     <>
       <p className="visually-hidden" aria-live="polite">
@@ -97,6 +124,9 @@ export default function App() {
             <button type="button" onClick={runFailingAddCheck}>
               Run failing-add check
             </button>
+            <button type="button" onClick={showFailingAddDiff}>
+              Show failing-add diff
+            </button>
           </div>
           <p className="build">Build {buildVersion}</p>
         </main>
@@ -120,6 +150,17 @@ export default function App() {
           status={checkStatus}
           check={check}
           message={checkMessage}
+          onBack={() => {
+            setScreen("home");
+          }}
+        />
+      ) : null}
+      {screen === "diff" ? (
+        <DiffScreen
+          buildVersion={buildVersion}
+          status={diffStatus}
+          diff={diffView}
+          message={diffMessage}
           onBack={() => {
             setScreen("home");
           }}

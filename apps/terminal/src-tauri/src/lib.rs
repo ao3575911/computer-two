@@ -8,7 +8,7 @@ use gtk::prelude::WidgetExt;
 #[cfg(target_os = "linux")]
 use tauri::Manager;
 
-use check::run_failing_add_check;
+use check::{run_failing_add_check, show_failing_add_diff};
 use pty::{PtyState, open_shell, resize_pty, write_pty};
 
 const ACCESSIBLE_NAME: &str = "Computer Two";
@@ -26,7 +26,8 @@ pub fn run() {
             open_shell,
             write_pty,
             resize_pty,
-            run_failing_add_check
+            run_failing_add_check,
+            show_failing_add_diff
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

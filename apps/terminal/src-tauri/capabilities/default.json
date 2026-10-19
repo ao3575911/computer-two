@@ -9,6 +9,7 @@
     "allow-open-shell",
     "allow-write-pty",
     "allow-resize-pty",
-    "allow-run-failing-add-check"
+    "allow-run-failing-add-check",
+    "allow-show-failing-add-diff"
   ]
 }
