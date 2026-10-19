@@ -3,10 +3,25 @@ use std::process::{Command, Stdio};
 
 #[tauri::command]
 pub fn run_failing_add_check() -> Result<String, String> {
+    run_node_script(
+        "observe-cli.ts",
+        "The failing-add check is not available in this build.",
+    )
+}
+
+#[tauri::command]
+pub fn show_failing_add_diff() -> Result<String, String> {
+    run_node_script(
+        "diff-cli.ts",
+        "The failing-add diff is not available in this build.",
+    )
+}
+
+fn run_node_script(script_name: &str, missing: &str) -> Result<String, String> {
     let repo = repo_root()?;
-    let script = repo.join("packages/sandbox/src/observe-cli.ts");
+    let script = repo.join("packages/sandbox/src").join(script_name);
     if !script.is_file() {
-        return Err("The failing-add check is not available in this build.".to_string());
+        return Err(missing.to_string());
     }
     let output = Command::new("node")
         .arg("--experimental-strip-types")
