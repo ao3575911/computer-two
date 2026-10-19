@@ -18,5 +18,7 @@ export {
   parseMission,
 } from "./mission.ts";
 export type { MissionLocation, MissionProposal } from "./mission.ts";
+export { mockPlan } from "./mock-plan.ts";
+export type { MockPlan } from "./mock-plan.ts";
 export { reduceMission } from "./reduce-mission.ts";
 export type { MissionReduction } from "./reduce-mission.ts";
