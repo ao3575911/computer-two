@@ -1,2 +1,2 @@
 def add(left, right):
-    return left + right + 1
+    return left + right
