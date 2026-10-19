@@ -1,6 +1,6 @@
 # computer-two
 
-C:2 Terminal is the Computer II desktop application. Slice 1 currently has the Linux desktop shell and a real local PTY.
+C:2 Terminal is the Computer II desktop application. Slice 1 currently has the Linux desktop shell, a real local PTY, and versioned protocol types.
 
 The repository license is undecided. Upstream components keep their own licenses. No project license file is included.
 
@@ -47,7 +47,7 @@ Tauri rejects `:` in `productName` (`^[^/\\:*?\"<>|]+$`). The bundle name is the
 ## Limitations
 
 - Open folder and Start sample mission do not run.
-- There is no planner, protocol, broker, sandbox, model adapter, cloud control plane, or OS image.
+- There is no planner, broker, sandbox, model adapter, cloud control plane, or OS image. `packages/protocol` has the starter schemas, the dispatch envelope, and a mock mission reducer. The reducer does not plan or call a model, and it does not execute a tool.
 - The blueprint simulator is not included.
 - Content-Security-Policy allows same-origin scripts. Styles allow same-origin files and inline style rules, because xterm.js sets cell color, font, and size that way. The text is the page color on the terminal background when those rules are blocked. The verified launch path is the bundled debug binary above. `npm run tauri dev` was not the command used for this check. Vite's React preamble is an inline script, so that command may not render under this policy.
 - App icons are the unmodified create-tauri-app placeholders. They are not Computer II brand assets.
@@ -71,3 +71,13 @@ Checked on this Linux host with `DISPLAY=:1` from the debug binary. `Open shell`
 Intent was checked with the Mode control. Shift+Enter inserted a line break in the draft. Enter showed "No planner is connected." and did not send the draft to the PTY. Switching back to Shell with the Mode control sent a later command to the shell.
 
 The window title was `C:2 Terminal`. The AT-SPI frame name was `Computer Two`. The application object name was `computer-two`.
+
+## Protocol
+
+`packages/protocol` keeps the starter mission and event schemas at version 0.1. The dispatch envelope is schema version 0.2 and adds only the fields named for that envelope. Unknown schema or tool versions fail closed. A caller-supplied tenant id is ignored; the reducer records the server tenant.
+
+```sh
+cd packages/protocol
+npm ci
+npm test
+```

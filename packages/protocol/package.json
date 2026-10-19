@@ -1,0 +1,15 @@
+{
+  "name": "computer-two-protocol",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Versioned Computer II protocol types and a mock mission reducer. Not a planner.",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/reduce-mission.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "6.0.3"
+  }
+}

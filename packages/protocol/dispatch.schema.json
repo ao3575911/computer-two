@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dispatch envelope v0.2",
+  "description": "Versioned review of the 0.1 mission proposal. This document adds only the dispatch envelope. schema_version 0.1 remains the mission proposal and the mission event. An unrecognized schema or tool version fails closed. tenant_id is server-derived; a caller-supplied value is not identity.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "tenant_id",
+    "mission_id",
+    "run_id",
+    "operation_id",
+    "fencing_token",
+    "tool_id",
+    "tool_version",
+    "arguments",
+    "scope",
+    "location",
+    "grant_id",
+    "policy_version",
+    "issued_at",
+    "expires_at",
+    "request_digest",
+    "budget_reservation_id",
+    "trace_id"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.2"
+    },
+    "tenant_id": {
+      "description": "Server-derived tenant. Do not trust a caller-supplied value.",
+      "type": "string",
+      "minLength": 1
+    },
+    "mission_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fencing_token": {
+      "description": "The attempt/fencing token.",
+      "type": "string",
+      "minLength": 1
+    },
+    "tool_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tool_version": {
+      "description": "Unrecognized tool versions fail closed.",
+      "enum": ["0.1"]
+    },
+    "arguments": {
+      "type": "object"
+    },
+    "scope": {
+      "description": "Resource scope. The starter schemas do not define a scope object, so this value stays an opaque string.",
+      "type": "string",
+      "minLength": 1
+    },
+    "location": {
+      "enum": ["device", "cloud"]
+    },
+    "grant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issued_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expires_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "budget_reservation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
