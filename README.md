@@ -1,6 +1,6 @@
 # computer-two
 
-C:2 Terminal is the Computer II desktop application. Slice 1 currently has the Linux desktop shell, a real local PTY, versioned protocol types, a mock planner, a slice 1 sandbox for one read and test tool, a mission timeline, and a reviewed diff that can be applied only when the base is unchanged.
+C:2 Terminal is the Computer II desktop application. Slice 1 currently has the Linux desktop shell, a real local PTY, versioned protocol types, a mock planner, one OpenAI model adapter for `fixtures/failing-add`, a slice 1 sandbox for one read and test tool, a mission timeline, and a reviewed diff that can be applied only when the base is unchanged.
 
 The repository license is undecided. Upstream components keep their own licenses. No project license file is included.
 
@@ -42,12 +42,12 @@ The window title is `C:2 Terminal`. The accessible name is `Computer Two`. The v
 
 Tauri rejects `:` in `productName` (`^[^/\\:*?\"<>|]+$`). The bundle name is therefore `Computer Two`, which is the spoken name. The window title stays `C:2 Terminal`.
 
-`Open shell` starts a local shell in shell mode. `Open folder` and `Start sample mission` stay disabled. Shell and intent are separate. The mode changes only through the Mode control. Intent submit shows that no planner is connected and does not write to the PTY. There is no model call.
+`Open shell` starts a local shell in shell mode. `Open folder` and `Start sample mission` stay disabled. Shell and intent are separate. The mode changes only through the Mode control. Intent submit shows that no planner is connected and does not write to the PTY. The window does not call a model.
 
 ## Limitations
 
 - Open folder and Start sample mission do not run.
-- There is no broker, model adapter, cloud control plane, or OS image. `packages/protocol` has the starter schemas, the dispatch envelope, a mock mission reducer, a mock planner, and an append-only mission event log. The planner emits one fixed dispatch envelope. It is not connected to the terminal window or to the sandbox. It does not call a model, and it does not execute a tool. The event log uses the step 3 event shape. It does not add authority-bearing fields, and it has no hash chain.
+- There is no broker, cloud control plane, or OS image. `packages/protocol` has the starter schemas, the dispatch envelope, a mock mission reducer, a mock planner, one OpenAI model adapter, and an append-only mission event log. The mock planner emits one fixed dispatch envelope and does not call a model. The model adapter is the provider path for `fixtures/failing-add`. It is not connected to the terminal window or to the sandbox, and it does not execute a tool. The event log uses the step 3 event shape. It does not add authority-bearing fields, and it has no hash chain.
 - `Run failing-add check` runs the slice 1 sandbox tool and shows the mission timeline in the window. The summary and the raw unittest log are separate. The check failure is an observation. The fixture is not fixed. The log is in memory for that run. It is not a durable store.
 - `Show failing-add diff` records a base revision of `fixtures/failing-add`, prepares one edit so `add` returns the sum, and runs `python3 -m unittest` on that copy inside the slice 1 sandbox. The window shows the diff. `Apply` writes that edit only when the base and result hashes still match the review. A newer local file is left intact and the window shows a conflict. `Stop` blocks a new apply immediately. A write whose confirmation is lost stays reconciling and is not shown as cancelled. No model is connected.
 - `packages/sandbox` is a slice 1 sandbox, not a production-grade boundary. Bubblewrap supplies a private mount namespace and turns the network off. The read/test tool can read manifest files and run `python3 -m unittest` inside that namespace. A prompt rule is not the control. Host `/usr`, `/lib`, and `/lib64` are mounted so Python can run. The host Docker socket is not mounted. Symlinks are rejected before the bind; that check is not a production TOCTOU defense. An independent escape assessment has not been done. This does not claim protection against a compromised host kernel, firmware, hardware, or a physical attacker.
@@ -78,6 +78,26 @@ The window title was `C:2 Terminal`. The AT-SPI frame name was `Computer Two`. T
 ## Protocol
 
 `packages/protocol` keeps the starter mission and event schemas at version 0.1. The dispatch envelope is schema version 0.2 and adds only the fields named for that envelope. Unknown schema or tool versions fail closed. A caller-supplied tenant id is ignored; the reducer records the server tenant. The mock planner emits that same envelope as one fixed plan and does not vary it from the request.
+
+## Model adapter
+
+The OpenAI Services Agreement is accepted for `fixtures/failing-add`. The provider is OpenAI. The model is pinned to `gpt-5-2025-08-07`. A response that names another model is not a plan.
+
+The adapter sends only `fixtures/failing-add/add.py` and `fixtures/failing-add/test_add.py`. A manifest entry outside that pair is rejected before any provider call. The request records those paths and their SHA-256 digests. A symlink is not sent. That check is not a production TOCTOU defense.
+
+The model may choose one action on the existing fixture tool, version 0.1: run the check, or read one of the files that were sent. The adapter stamps a dispatch envelope around that action. The server tenant, tool id, and tool version come from the adapter. Model text does not grant authority, and this step does not run the tool. Shell input is not part of the provider request. The window still reports that no planner is connected.
+
+Cost is an estimate from OpenAI's standard gpt-5 list price: $1.25 per million input tokens, $0.125 per million cached input tokens, and $10 per million output tokens. The figure uses the token counts in the provider response. It is not an invoice. Cached tokens are priced at the cached rate when the response includes that count. When the cache count is omitted, the estimate prices the input tokens at the full input rate.
+
+```sh
+cd packages/protocol
+npm test
+node --experimental-strip-types src/plan-cli.ts ../..
+```
+
+The second command calls the provider when `OPENAI_API_KEY` starts with `sk-` and contains no whitespace. Any other value, including an empty one, returns `provider_unconfigured` and does not send the fixture. The key stays in the environment.
+
+This host's `OPENAI_API_KEY` did not have that shape. OpenAI was not called for the recorded step, and there is no measured token usage. The prices above are the list rates the adapter applies to usage on a completed response. `npm test` checks those rates. That check is not a charge from a live run.
 
 ```sh
 cd packages/protocol
