@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-open-shell"
+description = "Enables the open_shell command without any pre-configured scope."
+commands.allow = ["open_shell"]
+
+[[permission]]
+identifier = "deny-open-shell"
+description = "Denies the open_shell command without any pre-configured scope."
+commands.deny = ["open_shell"]
