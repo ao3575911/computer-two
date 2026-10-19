@@ -1,5 +1,5 @@
 # C:2 Terminal
 
-Desktop application for Computer II. Step 1 is a Linux window with a static first screen.
+Desktop application for Computer II.
 
-Build and launch from the repository root README. `@xterm/xterm` is pinned in `package.json` and is not imported. There is no shell in this step.
+`Open shell` starts a local PTY in shell mode. Intent is a separate composer. `@xterm/xterm` draws the shell. Build and launch instructions are in the repository root README.

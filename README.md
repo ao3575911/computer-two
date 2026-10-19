@@ -1,6 +1,6 @@
 # computer-two
 
-C:2 Terminal is the Computer II desktop application. This repository currently contains the Linux desktop stack spike for slice 1, step 1.
+C:2 Terminal is the Computer II desktop application. Slice 1 currently has the Linux desktop shell and a real local PTY.
 
 The repository license is undecided. Upstream components keep their own licenses. No project license file is included.
 
@@ -14,9 +14,10 @@ Pinned after a Linux build on x86_64, 2026-10-18. The recommended stack built. I
 | Rust | 1.99.1 (`rust-toolchain.toml`) | MIT OR Apache-2.0 | Native toolchain. Tauri 2.12 states a minimum of Rust 1.90. This spike compiled with 1.99.1 only. |
 | TypeScript | 6.0.3 | Apache-2.0 | Frontend types. create-tauri-app 4.7.5 targets the TypeScript 6.0 line. TypeScript 7.0.2 is published and was not required for this window. |
 | React | 19.3.1 (`react-dom` 19.3.1) | MIT | First screen |
-| xterm.js | `@xterm/xterm` 6.0.0 | MIT | Dependency pin only. It is not imported. |
+| xterm.js | `@xterm/xterm` 6.0.0, `@xterm/addon-fit` 0.11.0 | MIT | Shell display and resize |
 | Vite | 8.3.4, `@vitejs/plugin-react` 6.1.2 | MIT | Frontend build |
 | GTK Rust bindings | `gtk` 0.18.2, `atk` 0.18.2 | MIT | Set the Linux window accessible name |
+| PTY | `portable-pty` 0.9.0 | MIT | Local shell session |
 
 The Linux binary links the system WebKitGTK and GTK libraries. Their Debian copyright files list more than one license, including LGPL-2+ for both and LGPL-2.1+ for GTK. Those libraries stay on the host; this repository does not vendor them. Rust itself is MIT OR Apache-2.0.
 
@@ -41,29 +42,22 @@ The window title is `C:2 Terminal`. The accessible name is `Computer Two`. The v
 
 Tauri rejects `:` in `productName` (`^[^/\\:*?\"<>|]+$`). The bundle name is therefore `Computer Two`, which is the spoken name. The window title stays `C:2 Terminal`.
 
-`Open folder`, `Start sample mission`, and `Open shell` are disabled buttons. They do not open a folder, start a mission, or open a shell.
+`Open shell` starts a local shell in shell mode. `Open folder` and `Start sample mission` stay disabled. Shell and intent are separate. The mode changes only through the Mode control. Intent submit shows that no planner is connected and does not write to the PTY. There is no model call.
 
 ## Limitations
 
-- This step does not integrate a PTY, a shell, or xterm.js.
-- The three first-screen actions are inert.
-- No protocol types, broker, sandbox, model adapter, cloud control plane, or OS image.
+- Open folder and Start sample mission do not run.
+- There is no planner, protocol, broker, sandbox, model adapter, cloud control plane, or OS image.
 - The blueprint simulator is not included.
 - Content-Security-Policy allows only same-origin scripts and styles. The verified launch path is the bundled debug binary above. `npm run tauri dev` was not the command used for this check. Vite's React preamble is an inline script, so that command may not render under this policy.
 - App icons are the unmodified create-tauri-app placeholders. They are not Computer II brand assets.
 - Repository license, domains, and trademark jurisdictions are undecided.
 - A release build (`npm run tauri build` without `--debug`) was not run. The verified build is the debug binary.
 
-## Launch result
+## Step 1 window
 
-On this machine, `DISPLAY=:1` was a live X11 session. The command above completed, and `./src-tauri/target/debug/computer-two` opened a window.
+The parent branch opened a window on `DISPLAY=:1`. Its title was `C:2 Terminal` and its AT-SPI frame name was `Computer Two`. That check used a build where all three actions were disabled.
 
-Observed:
+## Step 2 host check
 
-- `WM_NAME` and `_NET_WM_NAME` were `C:2 Terminal`.
-- The AT-SPI frame name was `Computer Two`. The application object name was `computer-two`, the binary name.
-- The first screen showed Computer II, C:2 Terminal, the three disabled actions, and `Build 0.1.0`.
-- Clicking those actions opened no other window.
-- WebKit's accessibility tree in this session exposed the frame and did not expose the page buttons as separate AT-SPI objects. The buttons are disabled in the page.
-
-Screenshot: `media/slice-1-step-1.png` in the build notes for this session. It is not committed in this repository.
+Resize, signals, a TUI, Unicode, and IME are recorded after the host run for this branch.
