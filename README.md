@@ -60,4 +60,14 @@ The parent branch opened a window on `DISPLAY=:1`. Its title was `C:2 Terminal` 
 
 ## Step 2 host check
 
-Resize, signals, a TUI, Unicode, and IME are recorded after the host run for this branch.
+Checked on this Linux host with `DISPLAY=:1` from the debug binary. `Open shell` entered shell mode. The prompt was visible after inline terminal styles were allowed.
+
+- Resize: the PTY followed the window. `stty size` reported `20 107`, then `13 86` after the window was made smaller.
+- Signals: Ctrl+C while `sleep 30` was the foreground process printed `^C`. The next command, `echo $?`, printed `130`. The session stayed in shell mode.
+- TUI: `vim -Nu NONE -n` (vim 9.1.697) drew its full-screen intro, and `:q` returned to the prompt. `less` is not installed on this host.
+- Unicode: a `printf` of UTF-8 bytes printed `café 你好`, and those glyphs were visible. Typing `café-typed` into the shell echoed that text. The terminal font stack is DejaVu Sans Mono, then WenQuanYi Micro Hei Mono.
+- IME: not verified. This host has no ibus, fcitx, or fcitx5 process, and `GTK_IM_MODULE`, `QT_IM_MODULE`, and `XMODIFIERS` are unset, so there is no input-method composition session to exercise.
+
+Intent was checked with the Mode control. Shift+Enter inserted a line break in the draft. Enter showed "No planner is connected." and did not send the draft to the PTY. Switching back to Shell with the Mode control sent a later command to the shell.
+
+The window title was `C:2 Terminal`. The AT-SPI frame name was `Computer Two`. The application object name was `computer-two`.
