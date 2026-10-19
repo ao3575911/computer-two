@@ -22,5 +22,18 @@ export { createEventLog, timelineLines } from "./event-log.ts";
 export type { AppendFailure, AppendResult, EventLog } from "./event-log.ts";
 export { mockPlan } from "./mock-plan.ts";
 export type { MockPlan } from "./mock-plan.ts";
+export {
+  ACCEPTED_FIXTURE,
+  ACCEPTED_TERMS,
+  PINNED_MODEL,
+  PROVIDER,
+  planFailingAdd,
+} from "./model-adapter.ts";
+export type {
+  CostEstimate,
+  ModelPlan,
+  PlanOptions,
+  SentFile,
+} from "./model-adapter.ts";
 export { reduceMission } from "./reduce-mission.ts";
 export type { MissionReduction } from "./reduce-mission.ts";
