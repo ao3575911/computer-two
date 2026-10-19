@@ -29,7 +29,7 @@ pub fn run_failing_add_check() -> Result<String, String> {
 
 fn repo_root() -> Result<PathBuf, String> {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
+        .join("../../..")
         .canonicalize()
         .map_err(|error| error.to_string())
 }
