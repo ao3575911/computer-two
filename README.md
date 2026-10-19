@@ -49,7 +49,7 @@ Tauri rejects `:` in `productName` (`^[^/\\:*?\"<>|]+$`). The bundle name is the
 - Open folder and Start sample mission do not run.
 - There is no planner, protocol, broker, sandbox, model adapter, cloud control plane, or OS image.
 - The blueprint simulator is not included.
-- Content-Security-Policy allows only same-origin scripts and styles. The verified launch path is the bundled debug binary above. `npm run tauri dev` was not the command used for this check. Vite's React preamble is an inline script, so that command may not render under this policy.
+- Content-Security-Policy allows same-origin scripts. Styles allow same-origin files and inline style rules, because xterm.js sets cell color, font, and size that way. The text is the page color on the terminal background when those rules are blocked. The verified launch path is the bundled debug binary above. `npm run tauri dev` was not the command used for this check. Vite's React preamble is an inline script, so that command may not render under this policy.
 - App icons are the unmodified create-tauri-app placeholders. They are not Computer II brand assets.
 - Repository license, domains, and trademark jurisdictions are undecided.
 - A release build (`npm run tauri build` without `--debug`) was not run. The verified build is the debug binary.
